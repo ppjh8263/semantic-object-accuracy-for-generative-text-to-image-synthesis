@@ -26,6 +26,7 @@ from model import RNN_ENCODER, CNN_ENCODER
 from miscc.losses import words_loss
 from miscc.losses import discriminator_loss, generator_loss, KL_loss
 
+from pytorch_pretrained_bert import BertTokenizer, BertModel, BertForMaskedLM
 
 # ################# Text to image task############################ #
 class condGANTrainer(object):
@@ -75,12 +76,17 @@ class condGANTrainer(object):
         print('Load image encoder from:', img_encoder_path)
         image_encoder.eval()
 
-        text_encoder = RNN_ENCODER(self.n_words, nhidden=cfg.TEXT.EMBEDDING_DIM)
-        state_dict = torch.load(cfg.TRAIN.NET_E, map_location=lambda storage, loc: storage)
-        text_encoder.load_state_dict(state_dict)
+        # text_encoder = RNN_ENCODER(self.n_words, nhidden=cfg.TEXT.EMBEDDING_DIM)
+        # state_dict = torch.load(cfg.TRAIN.NET_E, map_location=lambda storage, loc: storage)
+        # text_encoder.load_state_dict(state_dict)
+        # for p in text_encoder.parameters():
+        #     p.requires_grad = False
+        # print('Load text encoder from:', cfg.TRAIN.NET_E)
+        # text_encoder.eval()
+
+        text_encoder = BertModel.from_pretrained('bert-base-uncased')
         for p in text_encoder.parameters():
             p.requires_grad = False
-        print('Load text encoder from:', cfg.TRAIN.NET_E)
         text_encoder.eval()
 
         # #######################generator and discriminators############## #
@@ -354,6 +360,8 @@ class condGANTrainer(object):
                     num_words = words_embs.size(2)
                     if mask.size(1) > num_words:
                         mask = mask[:, :num_words]
+                # with torch.no_grad():
+                #     encoded_layers, _ = text_encoder(tokens_tensor, segment_tensors)                 
 
                 #######################################################
                 # (2) Generate fake images
