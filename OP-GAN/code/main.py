@@ -126,9 +126,7 @@ if __name__ == "__main__":
         dataloaders = []
         for max_objects in range(num_max_objects+1):
             subset = torch.utils.data.Subset(dataset, dataset_indices[max_objects])
-            print(subset)
             dataset_subsets.append(subset)
-            print(int(cfg.WORKERS))
             dataloader = torch.utils.data.DataLoader(subset, batch_size=cfg.TRAIN.BATCH_SIZE[max_objects],
                                                      drop_last=True,
                                                      shuffle=bshuffle,
